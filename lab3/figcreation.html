@@ -1,0 +1,212 @@
+<html>
+<!--<meta charset="utf-8"/> -->
+	<head>
+		<title>WebGL - It's lit</title>
+	</head>
+	<script id="vertex-shader" type="x-shader/x-vertex">
+
+precision mediump float;
+attribute vec4 vPosition;
+attribute vec4 vNormal;
+attribute vec4 vNormal2;
+attribute vec4 vNormal3;
+
+varying vec4 fColor;
+
+uniform mat4 mWorld;
+uniform mat4 mView;
+uniform mat4 mProj;
+uniform mat4 trans;
+uniform mat4 scale;
+
+uniform vec4 ambientProduct, diffuseProduct, specularProduct;
+uniform vec4 ambientProduct2, diffuseProduct2, specularProduct2;
+uniform vec4 ambientProduct3, diffuseProduct3, specularProduct3;
+uniform mat4 modelViewMatrix;
+uniform mat4 projectionMatrix;
+uniform vec4 lightPosition;
+uniform vec4 lightPosition2;
+uniform vec4 lightPosition3;
+uniform float shininess;
+uniform float shininess2;
+uniform float shininess3;
+uniform mat3 normalMatrix1;
+
+
+void
+main()
+{
+	
+    vec3 pos = (trans *mWorld *scale * vPosition).xyz;
+	vec4 lightPos= lightPosition;
+	vec4 lightPos2= lightPosition2;
+	vec4 lightPos3= lightPosition3;
+    vec3 light = lightPos.xyz;
+	vec3 light2 = lightPos2.xyz;
+	vec3 light3 = lightPos3.xyz;
+	float distance = length(light-pos);
+      float distance2 = length(light2-pos);
+      float distance3 = length(light3-pos);
+    vec3 L;
+    
+    // check for directional light
+    
+   // if(lightPos.w == 0.0) L = normalize(light);
+     L = normalize( light - pos );
+	vec3 L2 = normalize( light2 - pos );
+	vec3 L3 = normalize( light3 - pos );
+
+	
+    vec3 E = -normalize( pos );
+    vec3 H = normalize( L + E );
+	vec3 E2 = -normalize( pos );
+    vec3 H2 = normalize( L2 + E2 );
+	vec3 E3 = -normalize( pos );
+    vec3 H3 = normalize( L3 + E3 );
+
+    // Transform vertex normal into eye coordinates
+    
+       
+    vec3 N = normalize( trans *mWorld *scale *vNormal).xyz;
+
+    // Compute terms in the illumination equation
+    vec4 ambient = ambientProduct;
+
+    float Kd = max( dot(L, N), 0.0 );//distance;
+	float Kd2 = max( dot(L2, N), 0.0 );//distance2;
+	float Kd3 = max( dot(L3, N), 0.0 );//distance3;
+    vec4  diffuse = Kd*diffuseProduct + diffuseProduct2 * Kd2 + diffuseProduct3 *Kd3;
+
+    float Ks = pow( max(dot(N, L), 0.0), shininess );
+	float Ks2 = pow( max(dot(N, L2), 0.0), shininess );
+	float Ks3 = pow( max(dot(N, L3), 0.0), shininess );
+	
+    vec4  specular = Ks * specularProduct + Ks2 * specularProduct2 + Ks3 * specularProduct3;
+    
+
+    gl_Position = mProj * mView * trans *mWorld *scale* vPosition;
+    
+    fColor =  ambient + specular + diffuse;
+
+    fColor.a = 1.0;
+}
+</script>
+
+<script id="fragment-shader" type="x-shader/x-fragment">
+
+precision mediump float;
+
+varying vec4 fColor;
+
+void
+main()
+{
+
+    gl_FragColor = fColor;
+
+}
+</script>
+	<body onload="InitDemo();">
+		<canvas id="game-surface" width="800" height="500">
+			Your browser does not support HTML5
+		</canvas>
+		<br/>
+			<form>
+				<div style="height: 500px; width: 740px; border:3px solid #000000; position: fixed; left: 8px; top: 510px; color: black">
+        <h4 style="font-family: Verdana;"><i>Create Object</i></h4> 
+
+			<select id="choose">
+				<option value='cube'>Cube</option>
+				<option value='pyramid'>Pyramid</option>
+				<option value='sphere'>Sphere</option>
+				<option value='seashell'>Seashell</option>	
+			</select>
+		</br>
+		Edge/radius:
+		<input type="text" id="Field1"/>
+		Height/iterations:
+		<input type="text" id="Field2"/>
+		<input type="button" onclick="create(getElementById('choose').value,parseFloat(document.getElementById('Field1').value),parseFloat(document.getElementById('Field2').value))" value="Add", style="background:black; cursor:pointer;color:white;border: 1px solid black ; padding: 8px">
+		<br/>
+	
+		<p id="NrElem">Nr of elements: 0</p>
+		
+		Element index in array:
+		<input type="text" id="index">
+		<input type="button" onclick="objects.splice(parseInt(document.getElementById('index').value),1);document.getElementById('NrElem').innerHTML='Nr of elements: '+objects.length" value="Remove", style="background:black; cursor:pointer;color:white;border: 1px solid black ; padding: 8px">	 
+		</form>
+		<br/>
+		<button id = "Left_Rot_X", style="background:black; cursor:pointer;color:white;border: 1px solid black ; padding: 8px"> Left_Rot_X</button>
+		<button id = "Right_Rot_X", style="background:black; cursor:pointer;color:white;border: 1px solid black ; padding: 8px"> Right_Rot_X</button>
+		<p> </p>
+		<button id = "Down_Rot_Y", style="background:black; cursor:pointer;color:white;border: 1px solid black ; padding: 8px"> Down_Rot_Y</button>
+		<button id = "Up_Rot_Y", style="background:black; cursor:pointer;color:white;border: 1px solid black ; padding: 8px"> Up_Rot_Y</button>
+		<p> </p>
+		<button id = "Forward_Rot_Z", style="background:black; cursor:pointer;color:white;border: 1px solid black ; padding: 8px"> Forward_Rot_Z</button>
+		<button id = "Backward_Rot_Z", style="background:black; cursor:pointer;color:white;border: 1px solid black ; padding: 8px"> Backward_Rot_Z</button>
+		<br/>
+		<div style="height: 440px; width: 300px; border:3px solid #000000; position: fixed; left: 810px; top: 510px; color: black">
+        
+        <h4 style="font-family: Verdana;"><i>Let it be Light</i></h4>
+		x
+		<input id="LightZ" type="range" min="-10" max="10" step="0.1" value="0" />
+		<br/>
+		y
+		<input id="LightZ2" type="range" min="-20" max="20" step="0.1" value="0" />
+		<br/>
+		z
+		<input id="LightZ3" type="range" min="-20" max="20" step="0.1" value="0" />
+		<br/>
+		shiness
+		<input id="spec" type="range" min="20" max="200" step="0.1" value="20" />
+		<br/>
+		ambient
+		<input id="ambient" type="color" onchange="ambientchange(this.value)"></input>
+		<br/>
+		diffuse 
+		<input id="diffuse" type="color" onchange="diffusechange(this.value)"></input>
+		<br/>
+		specular
+		<input id="specular" type="color" onchange="specularchange(this.value)"></input>
+		<br/>
+		material
+		<input id="material" type="color" onchange="materialchange(this.value)"></input>
+		 
+		</form>
+		<p id="demo">value:</p>
+		<p id="demo2">value:</p>
+		<p id="demo3">value:</p>
+		<p id="demo4">value:</p>
+		
+		<script src="MV.js"></script>
+		<script src="gl-matrix.js"></script>
+		<script src="figcreation.js"></script>
+		<script type="text/javascript" src="webgl-utils.js"></script>
+		<script type="text/javascript" src="initShaders.js"></script>
+<div style="height: 440px; width: 300px; border:3px solid #000000; position: fixed; left: 810px; top: 8px; color: black">
+        
+        <h4 style="font-family: Verdana;"><i>Controls</i></h4>
+<audio controls src="tbanothermedium.mp3">
+        <div style="border: 1px solid black ; padding: 8px ;">
+        Sorry, your browser does not support the <audio> tag used in this demo.
+        </div>
+    </audio>
+    <style>
+   div {
+    padding: 30px; /* Поля вокруг текста */
+    margin-bottom: 2px; /* Отступ снизу */
+   }
+   #left { text-align: left; }
+   #center { text-align: center; }
+   .content {
+    width: 70%; /* Ширина слоя */
+    background: #b4bdcc; /* Цвет фона */
+   }
+  </style>
+ </head>
+ <body>
+  <div id="left"><div class="content">Keys (or you can use numpad):<br> W - up <br> A -left <br>
+    S - down <br> D - right <br> R - zoom out<br> T -zoom in</div></div>
+	</body>
+	</div>
+</html>

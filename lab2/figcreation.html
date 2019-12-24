@@ -1,0 +1,67 @@
+<html>
+	<head>
+		<title>WebGL - Rotating Cube</title>
+        <h1>Party Objects</h1>
+	</head>
+	<body onload="InitDemo();">
+		<canvas id="surface" width="800" height="600">
+			Your browser does not support webgl
+		</canvas>
+		<br/>
+			<form>
+			<select id="choose">
+				<option value='cube'>Cube</option>
+				<option value='pyramid'>Pyramid</option>
+				<option value='sphere'>Sphere</option>
+			</select>
+	    </br>
+		Edge/radius:
+		<input type="text" id="Field1"/>
+		Height/iterations:
+		<input type="text" id="Field2"/>
+		<input type="button" onclick="create(getElementById('choose').value,parseFloat(document.getElementById('Field1').value),parseFloat(document.getElementById('Field2').value))" value="Add", style="background:black; cursor:pointer;color:white;border: 1px solid black ; padding: 8px">
+		<br/>
+
+		<p id="NrElem">Nr of elements: 0</p>
+		
+		Element index in array:
+		<input type="text" id="index">
+		<input type="button" onclick="objects.splice(parseInt(document.getElementById('index').value),1);document.getElementById('NrElem').innerHTML='Nr of elements: '+objects.length" value="Remove", style="background:black; cursor:pointer;color:white;border: 1px solid black ; padding: 8px">	 
+		</form>
+		<button id = "Left_Rot_X", style="background:black; cursor:pointer;color:white;border: 1px solid black ; padding: 8px"> Left_Rot_X</button>
+		<button id = "Right_Rot_X", style="background:black; cursor:pointer;color:white;border: 1px solid black ; padding: 8px"> Right_Rot_X</button>
+		<p> </p>
+		<button id = "Down_Rot_Y", style="background:black; cursor:pointer;color:white;border: 1px solid black ; padding: 8px"> Down_Rot_Y</button>
+		<button id = "Up_Rot_Y", style="background:black; cursor:pointer;color:white;border: 1px solid black ; padding: 8px"> Up_Rot_Y</button>
+		<p> </p>
+		<button id = "Forward_Rot_Z", style="background:black; cursor:pointer;color:white;border: 1px solid black ; padding: 8px"> Forward_Rot_Z</button>
+		<button id = "Backward_Rot_Z", style="background:black; cursor:pointer;color:white;border: 1px solid black ; padding: 8px"> Backward_Rot_Z</button>
+			
+		<script src="MV2.js"></script>
+		<script src="MV.js"></script>
+		<script src="gl-matrix.js"></script>
+		<script src="figcreation.js"></script>
+		<p> </p>		
+    <audio controls src="tbanothermedium.mp3">
+        <div style="border: 1px solid black ; padding: 8px ;">
+            Sorry, your browser does not support the <audio> tag used in this demo.
+        </div>
+    </audio>
+    <style>
+   div {
+    padding: 30px; /* Поля вокруг текста */
+    margin-bottom: 2px; /* Отступ снизу */
+   }
+   #left { text-align: left; }
+   #center { text-align: center; }
+   .content {
+    width: 10%; /* Ширина слоя */
+    background: #b4bdcc; /* Цвет фона */
+   }
+  </style>
+ </head>
+ <body>
+  <div id="left"><div class="content">Controls:<br> W - up <br> A -left <br>
+    S - down <br> D - right <br> R - zoom out<br> T -zoom in</div></div>
+	</body>
+</html>
